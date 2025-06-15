@@ -1,0 +1,31 @@
+{
+    "name": "my-bots",
+    "version": "1.0.0",
+    "description": "AI Chat Assistant developed by Ahmed Abdat",
+    "main": "index.html",
+    "scripts": {
+        "dev": "npx netlify dev",
+        "build": "echo 'No build process needed for static site'",
+        "start": "npx netlify dev"
+    },
+    "keywords": [
+        "ai",
+        "chat",
+        "assistant",
+        "gemini",
+        "netlify"
+    ],
+    "author": "Ahmed Abdat",
+    "license": "MIT",
+    "homepage": "https://github.com/ahmed-abdat/My-Bots",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/ahmed-abdat/My-Bots.git"
+    },
+    "bugs": {
+        "url": "https://github.com/ahmed-abdat/My-Bots/issues"
+    },
+    "dependencies": {
+        "dotenv": "^16.5.0"
+    }
+}

@@ -1,3 +1,11 @@
+// Load environment variables from .env file for local development
+try {
+  require("dotenv").config({ path: "../../.env" });
+  console.log("✅ Environment loaded from .env file");
+} catch (error) {
+  console.warn("⚠️ Could not load .env file:", error.message);
+}
+
 // Netlify function wrapper for universal chat handler
 const {
   handleGeminiChat,
@@ -34,6 +42,12 @@ exports.handler = async (event, context) => {
   try {
     // Parse request body
     const { message, chatHistory } = parseRequestBody(event.body);
+
+    // Enhanced environment passing - use process.env directly
+    console.log(
+      "🔑 Environment variables loaded:",
+      Object.keys(process.env).filter((key) => key.includes("GEMINI"))
+    );
 
     // Call universal handler
     const result = await handleGeminiChat({

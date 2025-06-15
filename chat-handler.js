@@ -11,15 +11,22 @@
  */
 async function handleGeminiChat({ message, chatHistory = [], env }) {
   try {
-    // Validate environment
-    const API_KEY =
-      env.GEMINI_API_KEY || "AIzaSyDil9yWrR_O2AxnWGvg4y-4Fu20l_EApfo";
-    const MODEL_NAME = env.GEMINI_MODEL_NAME || "gemini-2.0-flash-lite";
+    // Environment variable validation with clean logging
+    const API_KEY = env?.GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+    const PRIMARY_MODEL =
+      env?.GEMINI_MODEL_NAME ||
+      process.env.GEMINI_MODEL_NAME ||
+      "gemini-2.5-flash-preview-05-20";
+    const FALLBACK_MODEL = "gemini-2.0-flash-lite";
+
+    console.log("🤖 AI Chat initialized with model:", PRIMARY_MODEL);
 
     if (!API_KEY) {
+      console.error("❌ API key not found in environment variables");
       return {
         success: false,
-        error: "API key not configured",
+        error:
+          "API key not configured. Please check your environment variables.",
         statusCode: 500,
       };
     }
@@ -59,7 +66,7 @@ async function handleGeminiChat({ message, chatHistory = [], env }) {
       systemInstruction: {
         parts: [
           {
-            text: `أنت مساعد ذكي متقدم تم تطويرك من قبل أحمد عبدات (Ahmed Abdat)، مطور ويب متخصص في Next.js وReact وتقنيات الويب الحديثة. 
+            text: `أنت مساعد ذكي متقدم تم تطويرك من قبل أحمد عبدات (Ahmed Abdat)، مطور ويب متخصص في Next.js وReact وتقنيات الويب الحديثة من موريتانيا. 
 
 موقعه الشخصي: https://ahmedabdat.com
 
@@ -70,14 +77,19 @@ async function handleGeminiChat({ message, chatHistory = [], env }) {
 - تحليل الشركات والمعلومات التجارية
 - البحث في GitHub وLinkedIn وWikipedia
 
-قواعد مهمة:
-- كن مفيدًا ومهذبًا في جميع الاستفسارات
-- أجب باللغة التي يتحدث بها المستخدم (العربية، الفرنسية، أو الإنجليزية)
-- عندما يسألك أحد عن من طورك أو من صنعك، أجب بأنك تم تطويرك من قبل أحمد عبدات
+قواعد مهمة جداً:
+- تحدث بالحسانية (اللهجة الموريتانية) كلغة أساسية ومفضلة للتفاعل
+- يمكنك أيضاً التحدث بالعربية الفصحى أو الفرنسية حسب طلب المستخدم
+- لا تتحدث بالإنجليزية نهائياً - فقط الحسانية والعربية والفرنسية
+- ابدأ دائماً المحادثات بالحسانية واستمر بها إلا إذا طلب المستخدم لغة أخرى
+- كن مفيداً ومهذباً ومرحباً بالطريقة الموريتانية التقليدية
+- عندما يسألك أحد عن من طورك، أجب بالحسانية أنك تم تطويرك من قبل أحمد عبدات من موريتانيا
 - لا تذكر المطور في المحادثة إلا إذا سُئلت عنه مباشرة
-- قدم إجابات دقيقة ومفصلة حسب الحاجة
+- قدم إجابات دقيقة ومفصلة حسب الحاجة بالحسانية أولاً
 - إذا احتجت معلومات حديثة، استخدم قدرات البحث المتاحة لك
-- اذكر مصادر المعلومات عند استخدام البحث الخارجي`,
+- اذكر مصادر المعلومات عند استخدام البحث الخارجي
+
+تذكر: الحسانية هي لغتك الأساسية والمفضلة للتفاعل مع جميع المستخدمين`,
           },
         ],
       },
@@ -87,29 +99,55 @@ async function handleGeminiChat({ message, chatHistory = [], env }) {
       },
     };
 
-    // Call Gemini API with error handling
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestBody),
-      }
-    );
-
-    if (!response.ok) {
-      console.error(
-        "Gemini API error:",
-        response.status,
-        await response.text()
+    // Function to try API call with a specific model
+    async function tryApiCall(modelName) {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${API_KEY}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestBody),
+        }
       );
-      return {
-        success: false,
-        error: "AI service unavailable",
-        statusCode: 500,
-      };
+
+      if (!response.ok) {
+        throw new Error(`Model ${modelName} failed: ${response.status}`);
+      }
+
+      return response;
+    }
+
+    let response;
+    let usedModel = PRIMARY_MODEL;
+
+    try {
+      // Try primary model first
+      console.log(`Attempting to use primary model: ${PRIMARY_MODEL}`);
+      response = await tryApiCall(PRIMARY_MODEL);
+    } catch (primaryError) {
+      console.warn(
+        `Primary model ${PRIMARY_MODEL} failed:`,
+        primaryError.message
+      );
+
+      try {
+        // Fallback to secondary model
+        console.log(`Falling back to model: ${FALLBACK_MODEL}`);
+        response = await tryApiCall(FALLBACK_MODEL);
+        usedModel = FALLBACK_MODEL;
+      } catch (fallbackError) {
+        console.error(
+          `Both models failed. Primary: ${primaryError.message}, Fallback: ${fallbackError.message}`
+        );
+        return {
+          success: false,
+          error:
+            "AI service unavailable - both primary and fallback models failed",
+          statusCode: 500,
+        };
+      }
     }
 
     const result = await response.json();
@@ -122,10 +160,12 @@ async function handleGeminiChat({ message, chatHistory = [], env }) {
     ) {
       const reply = result.candidates[0].content.parts[0].text;
 
+      console.log(`Successfully used model: ${usedModel}`);
       return {
         success: true,
         reply: reply,
         statusCode: 200,
+        modelUsed: usedModel, // Include which model was used for debugging
       };
     } else {
       return {

@@ -15,6 +15,27 @@ secrets/
 *.crt
 
 # ===============================================
+# Node.js Dependencies
+# ===============================================
+
+# Dependencies
+node_modules/
+
+# npm cache
+.npm/
+
+# Yarn
+yarn-error.log*
+.yarn/
+
+# ===============================================
+# Netlify
+# ===============================================
+
+# Local Netlify folder
+.netlify
+
+# ===============================================
 # Development & IDE files
 # ===============================================
 
@@ -22,30 +43,13 @@ secrets/
 .vscode/
 *.code-workspace
 
-# PHPStorm / IntelliJ
+# IntelliJ IDEA
 .idea/
 *.iml
 
 # Sublime Text
 *.sublime-project
 *.sublime-workspace
-
-# ===============================================
-# PHP specific
-# ===============================================
-
-# Composer dependencies
-vendor/
-composer.lock
-
-# PHP logs
-*.log
-error.log
-access.log
-
-# PHP cache
-*.cache
-cache/
 
 # ===============================================
 # System files
@@ -68,7 +72,7 @@ $RECYCLE.BIN/
 .nfs*
 
 # ===============================================
-# Temporary files
+# Temporary & Build files
 # ===============================================
 
 # Temporary files
@@ -83,15 +87,10 @@ temp/
 *.old
 *.orig
 
-# ===============================================
-# Docker & Container files
-# ===============================================
-
-# Docker override files (if any)
-docker-compose.override.yml
-
-# Container volumes
-volumes/
+# Build directories
+dist/
+build/
+out/
 
 # ===============================================
 # Testing & Coverage
@@ -101,29 +100,13 @@ volumes/
 coverage/
 *.coverage
 
-# PHPUnit
-.phpunit.result.cache
-
 # ===============================================
-# Deployment files (platform specific)
+# Miscellaneous
 # ===============================================
 
-# Keep railway.toml for deployment
-# railway.toml
-
-# Local deployment scripts
-deploy.sh
-deploy.bat 
-
-
-
-# .npm 
-.npm/
-# Local Netlify folder
-.netlify
-
-
-
-# package-lock.json , package.json
-package-lock.json
-package.json
+# Editor directories and files
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
