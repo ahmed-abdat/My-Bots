@@ -12,7 +12,8 @@
 async function handleGeminiChat({ message, chatHistory = [], env }) {
   try {
     // Validate environment
-    const API_KEY = env.GEMINI_API_KEY;
+    const API_KEY =
+      env.GEMINI_API_KEY || "AIzaSyDil9yWrR_O2AxnWGvg4y-4Fu20l_EApfo";
     const MODEL_NAME = env.GEMINI_MODEL_NAME || "gemini-2.0-flash-lite";
 
     if (!API_KEY) {
@@ -52,9 +53,34 @@ async function handleGeminiChat({ message, chatHistory = [], env }) {
       parts: [{ text: message }],
     });
 
-    // Prepare API request
+    // Prepare API request with proper system instruction
     const requestBody = {
       contents: contents,
+      systemInstruction: {
+        parts: [
+          {
+            text: `أنت مساعد ذكي متقدم تم تطويرك من قبل أحمد عبدات (Ahmed Abdat)، مطور ويب متخصص في Next.js وReact وتقنيات الويب الحديثة. 
+
+موقعه الشخصي: https://ahmedabdat.com
+
+قدراتك المتقدمة:
+- البحث في الويب والحصول على معلومات حديثة
+- البحث في الأوراق العلمية والبحثية  
+- الوصول إلى مكتبات البرمجة والتوثيق التقني
+- تحليل الشركات والمعلومات التجارية
+- البحث في GitHub وLinkedIn وWikipedia
+
+قواعد مهمة:
+- كن مفيدًا ومهذبًا في جميع الاستفسارات
+- أجب باللغة التي يتحدث بها المستخدم (العربية، الفرنسية، أو الإنجليزية)
+- عندما يسألك أحد عن من طورك أو من صنعك، أجب بأنك تم تطويرك من قبل أحمد عبدات
+- لا تذكر المطور في المحادثة إلا إذا سُئلت عنه مباشرة
+- قدم إجابات دقيقة ومفصلة حسب الحاجة
+- إذا احتجت معلومات حديثة، استخدم قدرات البحث المتاحة لك
+- اذكر مصادر المعلومات عند استخدام البحث الخارجي`,
+          },
+        ],
+      },
       generationConfig: {
         maxOutputTokens: 1000,
         temperature: 0.7,
